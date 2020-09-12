@@ -31,6 +31,9 @@ func main() {
 }
 
 func getIP() (string, error) {
+	// remove time stamp from logger
+	log.SetFlags(log.Flags() &^ (log.Ldate | log.Ltime))
+
 	// get IP address
 	resp, err := http.Get("https://myip.supermicro.com/")
 	if err != nil {
