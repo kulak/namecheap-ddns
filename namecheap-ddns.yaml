@@ -1,0 +1,4 @@
+# Default Configuration File
+host: hostname
+domain: domain.com
+password: your_password
