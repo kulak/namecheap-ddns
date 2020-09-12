@@ -8,7 +8,7 @@ Calls `https://myip.supermicro.com/` to detect external IP address and then call
 
     namecheap-ddns [config_file]
 
-- config_file is a YAML configuration file.   Default value is `namecheap-ddns.yaml`.
+- config_file is a YAML configuration file.   Default value is `namecheap-ddns.yaml`.  See, [example](https://github.com/Kulak/namecheap-ddns/blob/master/namecheap-ddns.yaml)
 
 ## Namecheap Documentation
 
