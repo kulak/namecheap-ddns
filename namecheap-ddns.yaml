@@ -1,4 +1,6 @@
 # Default Configuration File
-host: hostname
+hosts: 
+  - hostname1
+  - hostname2
 domain: domain.com
 password: your_password

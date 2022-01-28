@@ -1,8 +1,10 @@
 package main
 
 import (
+	"bytes"
 	"encoding/xml"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -26,11 +28,11 @@ func main() {
 	}
 
 	// update namecheap DDNS
-	err = updateDns(ipStr, conf)
+	err = updateDnsHosts(ipStr, conf)
 	if err != nil {
 		log.Panic(err)
 	}
-	log.Printf("Updated %v to IP: %v", conf.Host, ipStr)
+	log.Printf("Updated hosts %+v.%s to IP: %v", conf.Hosts, conf.Domain, ipStr)
 }
 
 func getIP() (string, error) {
@@ -65,9 +67,18 @@ func loadConfig() (*Config, error) {
 	return conf, err
 }
 
-func updateDns(ipStr string, conf *Config) error {
+func updateDnsHosts(ipStr string, conf *Config) error {
+	for _, eachHost := range conf.Hosts {
+		if err := updateDnsHost(ipStr, conf, eachHost); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func updateDnsHost(ipStr string, conf *Config, host string) error {
 	const format = "https://dynamicdns.park-your-domain.com/update?host=%v&domain=%v&password=%v&ip=%v"
-	url := fmt.Sprintf(format, conf.Host, conf.Domain, conf.Password, ipStr)
+	url := fmt.Sprintf(format, host, conf.Domain, conf.Password, ipStr)
 	resp, err := http.Get(url)
 	if err != nil {
 		return fmt.Errorf("Failed to update IP: %v", err)
@@ -79,7 +90,7 @@ func updateDns(ipStr string, conf *Config) error {
 		return fmt.Errorf("Failed to read namecheap response: %v", err)
 	}
 	var nr NamecheapResponse
-	err = xml.Unmarshal(content, &nr)
+	err = xmlDecode(content, &nr)
 	if err != nil {
 		log.Printf("Namecheap message: %v, url: %v", string(content), url)
 		return fmt.Errorf("Failed to parse namecheap response: %v", err)
@@ -88,6 +99,19 @@ func updateDns(ipStr string, conf *Config) error {
 		log.Printf("Namecheap message: %v, url: %v", string(content), url)
 		return fmt.Errorf("Namecheap did not accept request: %v", nr.Errors.Err1)
 	}
-	log.Printf("SUCCESS: %v", string(content))
+	// log.Printf("SUCCESS: %v", string(content))
 	return nil
+}
+
+func xmlDecode(data []byte, v interface{}) error {
+	d := xml.NewDecoder(bytes.NewReader(data))
+	d.CharsetReader = identReader
+	if err := d.Decode(v); err != nil {
+		return fmt.Errorf("failed to xml decode: %v", err)
+	}
+	return nil
+}
+
+func identReader(encoding string, input io.Reader) (io.Reader, error) {
+	return input, nil
 }
