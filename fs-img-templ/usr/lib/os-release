@@ -1,0 +1,4 @@
+PORTABLE_PRETTY_NAME="Portable for Go"
+PORTABLE_ID=portable-go
+PRETTY_NAME=TrivialOS
+ID=trivialos

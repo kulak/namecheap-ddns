@@ -1,0 +1,31 @@
+[Unit]
+After=network.target
+Description=Namecheap DDNS
+Wants=network.target
+
+[Service]
+ConfigurationDirectory=namecheap-ddns
+ExecStart=/usr/bin/namecheap-ddns /etc/namecheap-ddns/namecheap-ddns.yaml
+Group=namecheap-ddns
+LockPersonality=true
+NoNewPrivileges=true
+PrivateDevices=true
+PrivateTmp=true
+PrivateUsers=true
+ProtectClock=true
+ProtectControlGroups=true
+ProtectHome=true
+ProtectKernelModules=true
+ProtectKernelTunables=true
+ProtectProc=invisible
+ProtectSystem=strict
+Restart=no
+RestrictAddressFamilies=AF_INET AF_INET6 AF_NETLINK AF_UNIX
+RestrictNamespaces=true
+RestrictRealtime=true
+RestrictSUIDSGID=true
+SystemCallArchitectures=native
+SystemCallErrorNumber=EPERM
+SystemCallFilter=@system-service
+Type=simple
+User=namecheap-ddns

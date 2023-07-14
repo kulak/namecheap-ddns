@@ -1,0 +1,35 @@
+# https://taskfile.dev
+
+version: '3'
+
+tasks:
+
+  build:
+    desc: make build tree
+    cmds:
+    - mkdir -p build/usr/bin
+    - cmd: go build -tags netgo -o build/usr/bin/namecheap-ddns .
+
+  release:
+    desc: builds release image
+    cmds:
+    - cmd: rm -r build/ release/
+      ignore_error: true
+    - mkdir -p build/usr/bin build/usr/lib/systemd/system build/etc build/proc build/sys build/dev build/run build/tmp build/var/tmp
+    - mkdir -p build/etc/namecheap-ddns/
+    - mkdir release/
+    - cp -r ./fs-img-templ/* ./build/
+    - go build -tags netgo -o build/usr/bin/ .
+    - mksquashfs build/ release/namecheap-ddns.raw
+  
+  test-portable:
+    desc: release and deploy portable image
+    cmds:
+    - task: release
+    - sudo portablectl reattach ./release/namecheap-ddns.raw
+    - sudo systemctl start namecheap-ddns.service
+
+  install-dependencies-arch:
+    desc: instal dependencies on Arch Linux
+    cmds:
+    - sudo pacman -S squashfs-tools
